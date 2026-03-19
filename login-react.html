@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>PredictFC — Log In</title>
+
+  <!-- ── Google Fonts ─────────────────────────────────────────── -->
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+
+  <!-- ── React 18 + Babel (CDN — no build step needed) ──────── -->
+  <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <!-- ============================================================
+       GLOBAL CSS — identical to original login.html
+       ============================================================ -->
+  <style>
+    :root {
+      --color-bg:           #0a0a0f;
+      --color-surface:      #12121a;
+      --color-border:       rgba(255,255,255,0.07);
+      --color-accent:       #00e5a0;
+      --color-accent-dim:   rgba(0,229,160,0.12);
+      --color-accent-glow:  rgba(0,229,160,0.35);
+      --color-text-primary:   #f0f0f0;
+      --color-text-secondary: #8888a0;
+      --color-text-muted:     #44445a;
+      --color-error:          #ff4466;
+      --font: 'Poppins', sans-serif;
+      --radius-sm: 8px;
+      --radius-md: 16px;
+      --radius-lg: 28px;
+      --ease: cubic-bezier(.25,.8,.25,1);
+      --duration: 0.28s;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--font);
+      background-color: var(--color-bg);
+      color: var(--color-text-primary);
+      line-height: 1.6;
+      min-height: 100svh;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      background-image: radial-gradient(circle, rgba(255,255,255,0.03) 1px, transparent 1px);
+      background-size: 32px 32px;
+    }
+    /* React root fills the grid properly */
+    #root { display: contents; }
+    a { text-decoration: none; color: inherit; }
+
+    /* ── Left Panel ── */
+    .panel-left {
+      position: relative; overflow: hidden;
+      display: flex; flex-direction: column; justify-content: space-between;
+      padding: 40px 48px;
+      background: linear-gradient(160deg, rgba(0,229,160,0.07) 0%, rgba(0,112,255,0.05) 60%, transparent 100%);
+      border-right: 1px solid var(--color-border);
+    }
+    .panel-left::before, .panel-left::after {
+      content: ''; position: absolute; border-radius: 50%; filter: blur(100px); pointer-events: none;
+    }
+    .panel-left::before { width:500px;height:500px;top:-120px;left:-180px;background:radial-gradient(circle,rgba(0,229,160,0.22) 0%,transparent 70%); }
+    .panel-left::after  { width:400px;height:400px;bottom:-100px;right:-120px;background:radial-gradient(circle,rgba(0,112,255,0.16) 0%,transparent 70%); }
+
+    .left-logo { display:flex;align-items:center;gap:10px;font-size:1.15rem;font-weight:800;letter-spacing:-0.02em;position:relative;z-index:1; }
+    .left-logo-icon { width:34px;height:34px;background:var(--color-accent);border-radius:50%;display:grid;place-items:center;font-size:16px; }
+    .accent { color: var(--color-accent); }
+
+    .left-body { position: relative; z-index: 1; }
+    .left-eyebrow { font-size:0.72rem;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--color-accent);margin-bottom:14px; }
+    .left-heading { font-size:clamp(2rem,3vw,2.8rem);font-weight:900;line-height:1.1;letter-spacing:-0.03em;margin-bottom:16px; }
+    .left-sub { font-size:0.9rem;color:var(--color-text-secondary);max-width:38ch;line-height:1.75;margin-bottom:36px; }
+
+    .left-chips { display:flex;flex-direction:column;gap:12px; }
+    .left-chip { display:flex;align-items:center;gap:12px;padding:14px 18px;background:rgba(255,255,255,0.04);border:1px solid var(--color-border);border-radius:var(--radius-md);backdrop-filter:blur(10px); }
+    .left-chip-icon { font-size:1.2rem;flex-shrink:0; }
+    .left-chip-text { font-size:0.82rem;color:var(--color-text-secondary); }
+    .left-chip-text strong { color:var(--color-text-primary);font-weight:700;display:block; }
+
+    .left-quote { position: relative; z-index: 1; }
+    .left-quote blockquote { font-size:0.82rem;color:var(--color-text-secondary);font-style:italic;line-height:1.6;border-left:2px solid var(--color-accent);padding-left:14px;margin-bottom:10px; }
+    .left-quote cite { font-size:0.75rem;color:var(--color-text-muted);font-style:normal;font-weight:600; }
+
+    /* ── Right Panel ── */
+    .panel-right {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      padding: clamp(2rem,6vw,5rem) clamp(1.5rem,5vw,4rem);
+      position: relative;
+    }
+    .mobile-logo { display:none;align-items:center;gap:10px;font-size:1.1rem;font-weight:800;letter-spacing:-0.02em;margin-bottom:2.5rem; }
+    .mobile-logo-icon { width:32px;height:32px;background:var(--color-accent);border-radius:50%;display:grid;place-items:center;font-size:15px; }
+
+    .form-card { width: min(440px, 100%); }
+
+    .form-header { margin-bottom: 2.2rem; }
+    .form-header__eyebrow { font-size:0.72rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--color-accent);margin-bottom:10px; }
+    .form-header__title { font-size:clamp(1.6rem,3vw,2.1rem);font-weight:900;letter-spacing:-0.03em;line-height:1.15;margin-bottom:8px; }
+    .form-header__sub { font-size:0.85rem;color:var(--color-text-secondary);line-height:1.6; }
+    .form-header__sub a { color:var(--color-accent);font-weight:600;transition:opacity var(--duration); }
+    .form-header__sub a:hover { opacity:.75; }
+
+    .social-btns { display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:1.6rem; }
+    .social-btn {
+      display:flex;align-items:center;justify-content:center;gap:8px;padding:12px;
+      background:rgba(255,255,255,0.04);border:1px solid var(--color-border);border-radius:var(--radius-sm);
+      font-family:var(--font);font-size:0.82rem;font-weight:600;color:var(--color-text-primary);cursor:pointer;
+      transition:background var(--duration),border-color var(--duration),transform var(--duration);
+    }
+    .social-btn:hover { background:rgba(255,255,255,0.08);border-color:rgba(255,255,255,0.15);transform:translateY(-1px); }
+
+    .divider { display:flex;align-items:center;gap:14px;margin-bottom:1.6rem; }
+    .divider::before,.divider::after { content:'';flex:1;height:1px;background:var(--color-border); }
+    .divider__text { font-size:0.72rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-text-muted);white-space:nowrap; }
+
+    .auth-form { display:flex;flex-direction:column; }
+
+    .field { display:flex;flex-direction:column;gap:6px;margin-bottom:16px; }
+    .field__label { font-size:0.78rem;font-weight:700;letter-spacing:0.04em;color:var(--color-text-secondary);display:flex;justify-content:space-between;align-items:center; }
+    .field__label a { color:var(--color-accent);font-weight:500;font-size:0.75rem;transition:opacity var(--duration); }
+    .field__label a:hover { opacity:.7; }
+    .field__input-wrap { position:relative; }
+    .field__icon { position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--color-text-muted);pointer-events:none;transition:color var(--duration); }
+    .field__input {
+      width:100%;padding:13px 14px 13px 42px;
+      background:rgba(255,255,255,0.04);border:1px solid var(--color-border);border-radius:var(--radius-sm);
+      font-family:var(--font);font-size:0.88rem;font-weight:400;color:var(--color-text-primary);
+      outline:none;transition:border-color var(--duration),background var(--duration),box-shadow var(--duration);-webkit-appearance:none;
+    }
+    .field__input::placeholder { color:var(--color-text-muted); }
+    .field__input:focus { border-color:var(--color-accent);background:rgba(0,229,160,0.04);box-shadow:0 0 0 3px var(--color-accent-dim); }
+    .field__input-wrap:focus-within .field__icon { color:var(--color-accent); }
+    .field__toggle { position:absolute;right:14px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--color-text-muted);padding:2px;display:flex;align-items:center;transition:color var(--duration); }
+    .field__toggle:hover { color:var(--color-text-primary); }
+
+    .field--row { flex-direction:row;align-items:center;gap:10px;margin-bottom:22px; }
+    .field__checkbox {
+      width:18px;height:18px;border-radius:4px;border:1px solid var(--color-border);background:rgba(255,255,255,0.04);
+      appearance:none;-webkit-appearance:none;cursor:pointer;display:grid;place-items:center;flex-shrink:0;
+      transition:border-color var(--duration),background var(--duration);
+    }
+    .field__checkbox::after { content:'';width:9px;height:9px;border-radius:2px;background:var(--color-accent);opacity:0;transform:scale(.6);transition:opacity var(--duration),transform var(--duration); }
+    .field__checkbox:checked { border-color:var(--color-accent);background:var(--color-accent-dim); }
+    .field__checkbox:checked::after { opacity:1;transform:scale(1); }
+    .field__check-label { font-size:0.82rem;color:var(--color-text-secondary);cursor:pointer; }
+
+    .btn-submit {
+      width:100%;padding:14px;background:var(--color-accent);color:#0a0a0f;
+      font-family:var(--font);font-size:0.9rem;font-weight:800;letter-spacing:0.05em;text-transform:uppercase;
+      border:none;border-radius:var(--radius-sm);cursor:pointer;
+      position:relative;overflow:hidden;
+      transition:transform var(--duration) var(--ease),box-shadow var(--duration) var(--ease);
+      margin-bottom:16px;
+    }
+    .btn-submit::after { content:'';position:absolute;inset:0;background:rgba(255,255,255,0.15);opacity:0;transition:opacity var(--duration); }
+    .btn-submit:hover { transform:translateY(-2px);box-shadow:0 10px 32px var(--color-accent-glow); }
+    .btn-submit:hover::after { opacity:1; }
+    .btn-submit:active { transform:translateY(0); }
+
+    .form-hint { text-align:center;font-size:0.75rem;color:var(--color-text-muted);line-height:1.5; }
+    .form-hint a { color:var(--color-text-secondary);transition:color var(--duration); }
+    .form-hint a:hover { color:var(--color-accent); }
+
+    .form-tabs { display:flex;background:rgba(255,255,255,0.03);border:1px solid var(--color-border);border-radius:var(--radius-sm);padding:4px;margin-bottom:1.8rem;gap:4px; }
+    .form-tab { flex:1;padding:9px;text-align:center;font-size:0.82rem;font-weight:600;border-radius:calc(var(--radius-sm) - 2px);cursor:pointer;color:var(--color-text-secondary);transition:background var(--duration),color var(--duration); }
+    .form-tab--active { background:rgba(255,255,255,0.08);color:var(--color-text-primary); }
+
+    .back-link { position:absolute;top:28px;left:28px;display:flex;align-items:center;gap:6px;font-size:0.78rem;font-weight:600;color:var(--color-text-muted);transition:color var(--duration); }
+    .back-link:hover { color:var(--color-text-primary); }
+
+    @media (max-width: 900px) {
+      body { grid-template-columns: 1fr; }
+      .panel-left { display: none; }
+      .mobile-logo { display: flex; }
+      .panel-right { padding: 2rem 1.5rem; justify-content: flex-start; padding-top: 5rem; }
+      .back-link { top: 20px; left: 20px; }
+    }
+    @media (max-width: 420px) { .social-btns { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <!-- ============================================================
+       REACT APPLICATION — Login Page
+       ============================================================ -->
+  <script type="text/babel">
+
+    const { useState } = React;
+
+    // ================================================================
+    // COMPONENT: LeftPanel
+    // The decorative brand panel shown on desktop.
+    // Props: chips — array of {icon, title, subtitle}
+    // ================================================================
+    function LeftPanel({ chips }) {
+      return (
+        <aside className="panel-left">
+
+          {/* Logo */}
+          <a href="index.html" className="left-logo">
+            <div className="left-logo-icon">⚽</div>
+            Predict<span className="accent">FC</span>
+          </a>
+
+          {/* Central copy */}
+          <div className="left-body">
+            <p className="left-eyebrow">The Analyst's Edge</p>
+            <h2 className="left-heading">Data that<br />wins games.</h2>
+            <p className="left-sub">
+              Machine learning meets football intelligence. Sign in to unlock 40+ leagues
+              of AI predictions, live stats, and value alerts.
+            </p>
+
+            {/* Stat chips — rendered from props */}
+            <div className="left-chips">
+              {chips.map(chip => (
+                <div className="left-chip" key={chip.title}>
+                  <span className="left-chip-icon">{chip.icon}</span>
+                  <div className="left-chip-text">
+                    <strong>{chip.title}</strong>
+                    {chip.subtitle}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Testimonial quote */}
+          <div className="left-quote">
+            <blockquote>
+              "PredictFC changed how I approach every matchday — the confidence scores alone are worth it."
+            </blockquote>
+            <cite>— Marcus T., Pro Analyst · London</cite>
+          </div>
+
+        </aside>
+      );
+    }
+
+    // ================================================================
+    // COMPONENT: FormTabs
+    // Controlled tab switcher for Log In / Sign Up.
+    // Props: activeTab, onTabChange
+    // ================================================================
+    function FormTabs({ activeTab, onTabChange }) {
+      const tabs = ['Log In', 'Sign Up'];
+      return (
+        <div className="form-tabs">
+          {tabs.map(tab => (
+            <div
+              key={tab}
+              className={`form-tab ${activeTab === tab ? 'form-tab--active' : ''}`}
+              onClick={() => onTabChange(tab)}
+            >
+              {tab}
+            </div>
+          ))}
+        </div>
+      );
+    }
+
+    // ================================================================
+    // COMPONENT: SocialButtons
+    // Google and Apple sign-in buttons.
+    // ================================================================
+    function SocialButtons() {
+      return (
+        <div className="social-btns">
+          {/* Google */}
+          <button className="social-btn" type="button">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+              <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+              <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+              <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
+              <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+            </svg>
+            Google
+          </button>
+          {/* Apple */}
+          <button className="social-btn" type="button">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11"/>
+            </svg>
+            Apple
+          </button>
+        </div>
+      );
+    }
+
+    // ================================================================
+    // COMPONENT: LoginForm
+    // Controlled form with email, password, remember-me, and submit.
+    // Uses React useState for form field values.
+    // ================================================================
+    function LoginForm() {
+      // Controlled inputs — React state
+      const [email,    setEmail]    = useState('');
+      const [password, setPassword] = useState('');
+      const [remember, setRemember] = useState(false);
+      const [showPwd,  setShowPwd]  = useState(false);
+
+      // Form submit handler
+      const handleSubmit = (e) => {
+        e.preventDefault();
+        // TODO: connect to backend auth endpoint
+        alert(`Signing in as: ${email}`);
+      };
+
+      return (
+        <form className="auth-form" onSubmit={handleSubmit} noValidate>
+
+          {/* Email field */}
+          <div className="field">
+            <label className="field__label" htmlFor="email">Email address</label>
+            <div className="field__input-wrap">
+              <svg className="field__icon" width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <path d="M2 4l6 5 6-5M2 4h12a1 1 0 011 1v7a1 1 0 01-1 1H2a1 1 0 01-1-1V5a1 1 0 011-1z" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+              <input
+                className="field__input"
+                type="email"
+                id="email"
+                name="email"
+                placeholder="you@example.com"
+                autoComplete="email"
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                required
+              />
+            </div>
+          </div>
+
+          {/* Password field */}
+          <div className="field">
+            <label className="field__label" htmlFor="password">
+              Password
+              <a href="#">Forgot password?</a>
+            </label>
+            <div className="field__input-wrap">
+              <svg className="field__icon" width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <rect x="3" y="7" width="10" height="8" rx="1.5" stroke="currentColor" strokeWidth="1.4"/>
+                <path d="M5 7V5a3 3 0 016 0v2" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/>
+              </svg>
+              <input
+                className="field__input"
+                type={showPwd ? 'text' : 'password'}
+                id="password"
+                name="password"
+                placeholder="••••••••"
+                autoComplete="current-password"
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+                required
+              />
+              {/* Toggle password visibility — React state driven */}
+              <button
+                className="field__toggle"
+                type="button"
+                aria-label="Toggle password visibility"
+                onClick={() => setShowPwd(v => !v)}
+              >
+                {showPwd ? (
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                    <path d="M2 2l12 12M6.5 6.6A2 2 0 009.4 9.5M4.2 4.3C2.6 5.4 1 8 1 8s2.5 5 7 5c1.4 0 2.6-.4 3.6-1M6 3.1C6.6 3 7.3 3 8 3c4.5 0 7 5 7 5s-.7 1.4-1.9 2.7" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/>
+                  </svg>
+                ) : (
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                    <path d="M1 8s2.5-5 7-5 7 5 7 5-2.5 5-7 5-7-5-7-5z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round"/>
+                    <circle cx="8" cy="8" r="2" stroke="currentColor" strokeWidth="1.4"/>
+                  </svg>
+                )}
+              </button>
+            </div>
+          </div>
+
+          {/* Remember me */}
+          <div className="field field--row">
+            <input
+              className="field__checkbox"
+              type="checkbox"
+              id="remember"
+              checked={remember}
+              onChange={e => setRemember(e.target.checked)}
+            />
+            <label className="field__check-label" htmlFor="remember">
+              Remember me for 30 days
+            </label>
+          </div>
+
+          {/* Submit button */}
+          <button className="btn-submit" type="submit">Sign In</button>
+
+          {/* Legal hint */}
+          <p className="form-hint">
+            By signing in you agree to our <a href="#">Terms of Service</a> &amp; <a href="#">Privacy Policy</a>.
+          </p>
+        </form>
+      );
+    }
+
+    // ================================================================
+    // COMPONENT: RightPanel
+    // Contains the full login form area.
+    // ================================================================
+    function RightPanel() {
+      // Tab state — 'Log In' or 'Sign Up'
+      const [activeTab, setActiveTab] = useState('Log In');
+
+      return (
+        <main className="panel-right">
+
+          {/* Back link */}
+          <a href="index.html" className="back-link">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+              <path d="M13 7H1M6 2L1 7l5 5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+            Back to Home
+          </a>
+
+          {/* Mobile logo */}
+          <div className="mobile-logo">
+            <div className="mobile-logo-icon">⚽</div>
+            Predict<span className="accent">FC</span>
+          </div>
+
+          <div className="form-card">
+
+            {/* Form header */}
+            <div className="form-header">
+              <p className="form-header__eyebrow">Welcome Back</p>
+              <h1 className="form-header__title">Sign in to<br />PredictFC.</h1>
+              <p className="form-header__sub">
+                No account yet? <a href="#">Create one free →</a>
+              </p>
+            </div>
+
+            {/* Tab switcher — controlled by React state */}
+            <FormTabs activeTab={activeTab} onTabChange={setActiveTab} />
+
+            {/* Social login */}
+            <SocialButtons />
+
+            {/* Divider */}
+            <div className="divider">
+              <span className="divider__text">or continue with email</span>
+            </div>
+
+            {/* Login form */}
+            <LoginForm />
+
+          </div>
+        </main>
+      );
+    }
+
+    // ================================================================
+    // ROOT COMPONENT: App
+    // ================================================================
+    function App() {
+      // Chips data for left panel — edit here
+      const chips = [
+        { icon: '🎯', title: '87% Accuracy',       subtitle: 'Verified across last 3 seasons' },
+        { icon: '⚡', title: 'Real-Time Updates',  subtitle: 'Odds & lineups synced live' },
+        { icon: '🌍', title: '40+ Leagues',        subtitle: 'From Premier League to MLS' },
+      ];
+
+      return (
+        <>
+          <LeftPanel chips={chips} />
+          <RightPanel />
+        </>
+      );
+    }
+
+    // ── Mount to #root ───────────────────────────────────────────────
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
+
+  </script>
+</body>
+</html>
